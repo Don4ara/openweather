@@ -1,0 +1,30 @@
+{
+  "name": "openweather",
+  "version": "0.1.0",
+  "type": "module",
+  "bin": {
+    "openweather": "./bin/openweather"
+  },
+  "scripts": {
+    "dev": "bun run src/main.tsx",
+    "build": "bun build ./src/main.tsx --target=node --outdir=dist",
+    "compile": "bun build ./src/main.tsx --outfile openweather --compile",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "chalk": "latest",
+    "cli-boxes": "latest",
+    "cli-highlight": "latest",
+    "commander": "latest",
+    "ink": "latest",
+    "marked": "latest",
+    "react": "latest",
+    "wrap-ansi": "latest"
+  },
+  "devDependencies": {
+    "@types/bun": "latest",
+    "@types/node": "latest",
+    "@types/react": "latest",
+    "typescript": "latest"
+  }
+}

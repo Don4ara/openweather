@@ -1,0 +1,56 @@
+export type Lang = 'ru' | 'en';
+
+export const translations = {
+  ru: {
+    agent: 'Агент',
+    forecast: 'прогноз',
+    feelsLike: 'ощущается',
+    you: 'Вы',
+    tagline: 'Погода в терминале',
+    enterCity: 'Введите город...',
+    pressure: 'гПа',
+    submit: 'Enter отправить',
+    quit: 'Esc / Ctrl+C выход',
+    today: 'Сегодня',
+    tomorrow: 'Завтра',
+    conditions: {
+      clear: 'ясно',
+      partlyCloudy: 'переменная облачность',
+      fog: 'туман',
+      rain: 'дождь',
+      snow: 'снег',
+      showers: 'ливень',
+      snowfall: 'снегопад',
+      storm: 'гроза',
+    },
+    commands: {
+      lang: 'Переключить язык (ru → en)',
+    },
+  },
+  en: {
+    agent: 'Agent',
+    forecast: 'forecast',
+    feelsLike: 'feels like',
+    you: 'You',
+    tagline: 'Weather in terminal',
+    enterCity: 'Enter city...',
+    pressure: 'hPa',
+    submit: 'Enter to submit',
+    quit: 'Esc / Ctrl+C quit',
+    today: 'Today',
+    tomorrow: 'Tomorrow',
+    conditions: {
+      clear: 'clear',
+      partlyCloudy: 'partly cloudy',
+      fog: 'fog',
+      rain: 'rain',
+      snow: 'snow',
+      showers: 'showers',
+      snowfall: 'snowfall',
+      storm: 'thunderstorm',
+    },
+    commands: {
+      lang: 'Switch language (en → ru)',
+    },
+  },
+} as const;
