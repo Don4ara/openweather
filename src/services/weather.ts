@@ -1,4 +1,5 @@
 import {translations, type Lang} from '../i18n/index.ts';
+import {unitConfig, type UnitSystem} from './units.ts';
 
 export type WeatherIconType =
   | 'sun'
@@ -8,6 +9,20 @@ export type WeatherIconType =
   | 'storm'
   | 'snow'
   | 'mist';
+
+/** Accent color used by header/forecast UI, keyed by condition icon. */
+export function iconColor(type: WeatherIconType): string {
+  switch (type) {
+    case 'sun': return 'yellow';
+    case 'partly-cloudy': return 'yellow';
+    case 'rain': return 'blue';
+    case 'snow': return 'cyan';
+    case 'storm': return 'magenta';
+    case 'cloud':
+    case 'mist':
+    default: return 'gray';
+  }
+}
 
 export type DayForecast = {
   date: string;
@@ -33,6 +48,10 @@ export type WeatherResult = {
   wind: number;
   icon: string;
   iconType: WeatherIconType;
+  isDay: boolean;
+  system: UnitSystem;
+  tempLabel: string;
+  windLabel: string;
   forecast: DayForecast[];
 };
 
@@ -85,14 +104,15 @@ async function geocode(city: string, lang: Lang): Promise<{name: string; country
   return {name, country, latitude: parseFloat(g.lat), longitude: parseFloat(g.lon)};
 }
 
-export async function getWeather(city: string, lang: Lang = 'ru'): Promise<WeatherResult> {
+export async function getWeather(city: string, lang: Lang = 'ru', system: UnitSystem = 'metric'): Promise<WeatherResult> {
   const {name, country, latitude, longitude} = await geocode(city, lang);
+  const {temperatureUnit, windSpeedUnit, tempLabel, windLabel} = unitConfig[system];
 
   const weatherRes = await fetch(
     `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}` +
-    `&current=temperature_2m,apparent_temperature,relative_humidity_2m,surface_pressure,wind_speed_10m,weather_code` +
+    `&current=temperature_2m,apparent_temperature,relative_humidity_2m,surface_pressure,wind_speed_10m,weather_code,is_day` +
     `&daily=temperature_2m_max,temperature_2m_min,weather_code,precipitation_probability_max,wind_speed_10m_max,sunrise,sunset` +
-    `&temperature_unit=celsius&wind_speed_unit=ms&forecast_days=8&timezone=auto`
+    `&temperature_unit=${temperatureUnit}&wind_speed_unit=${windSpeedUnit}&forecast_days=8&timezone=auto`
   );
   if (!weatherRes.ok) throw new Error(`Weather fetch failed: ${weatherRes.status}`);
 
@@ -104,6 +124,7 @@ export async function getWeather(city: string, lang: Lang = 'ru'): Promise<Weath
       surface_pressure: number;
       wind_speed_10m: number;
       weather_code: number;
+      is_day: number;
     };
     daily: {
       time: string[];
@@ -117,7 +138,7 @@ export async function getWeather(city: string, lang: Lang = 'ru'): Promise<Weath
     };
   };
 
-  const {temperature_2m, apparent_temperature, relative_humidity_2m, surface_pressure, wind_speed_10m, weather_code} = data.current;
+  const {temperature_2m, apparent_temperature, relative_humidity_2m, surface_pressure, wind_speed_10m, weather_code, is_day} = data.current;
   const {condition, icon, iconType} = wmoToCondition(weather_code, lang);
 
   const forecast: DayForecast[] = data.daily.time.map((date, i) => {
@@ -147,6 +168,10 @@ export async function getWeather(city: string, lang: Lang = 'ru'): Promise<Weath
     wind: Math.round(wind_speed_10m * 10) / 10,
     icon,
     iconType,
+    isDay: is_day === 1,
+    system,
+    tempLabel,
+    windLabel,
     forecast,
   };
 }
