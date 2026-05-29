@@ -68,30 +68,30 @@ export function PromptInput({onSubmit, onCommand, commands, lang}: PromptInputPr
 
   return (
     <Box flexDirection="column">
-      <Box flexDirection="column" paddingLeft={3} height={commands.length}>
-        {isCommandMode && filtered.map((cmd, i) => {
-          const selected = i === clampedIndex;
-          return (
-            <Box key={cmd.name}>
-              <Text color={selected ? 'cyan' : 'gray'}>{selected ? '❯ ' : '  '}</Text>
-              <Text color={selected ? 'cyan' : 'gray'} bold={selected}>/{cmd.name}</Text>
-              <Text color="gray" dimColor>{'   '}{cmd.description}</Text>
-            </Box>
-          );
-        })}
-      </Box>
       <Box
-        borderStyle="single"
-        borderColor="gray"
-        borderTop={true}
-        borderBottom={true}
-        borderLeft={false}
-        borderRight={false}
-        paddingX={2}
+        borderStyle="round"
+        borderColor={isCommandMode ? 'cyan' : 'gray'}
+        paddingX={1}
       >
-        <Text color="cyan">&gt; </Text>
-        <Text>{value || placeholder}</Text>
+        <Text color="cyan" bold>❯ </Text>
+        {value
+          ? <Text>{value}<Text color="cyan">█</Text></Text>
+          : <Text><Text color="cyan">█</Text><Text color="gray" dimColor> {placeholder}</Text></Text>}
       </Box>
+      {isCommandMode && filtered.length > 0 && (
+        <Box flexDirection="column" paddingLeft={2}>
+          {filtered.map((cmd, i) => {
+            const selected = i === clampedIndex;
+            return (
+              <Box key={cmd.name}>
+                <Text color={selected ? 'cyan' : 'gray'}>{selected ? '❯ ' : '  '}</Text>
+                <Text color={selected ? 'cyan' : 'gray'} bold={selected}>/{cmd.name}</Text>
+                <Text color="gray" dimColor>{'   '}{cmd.description}</Text>
+              </Box>
+            );
+          })}
+        </Box>
+      )}
     </Box>
   );
 }

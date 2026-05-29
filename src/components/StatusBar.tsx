@@ -10,8 +10,8 @@ export function StatusBar({lang}: StatusBarProps) {
   const t = translations[lang];
   return (
     <Box justifyContent="space-between" paddingX={1}>
-      <Text color="gray">{t.submit}</Text>
-      <Text color="gray">{t.quit}</Text>
+      <Text color="gray" dimColor>{t.submit}  ·  /help {lang === 'ru' ? 'команды' : 'commands'}</Text>
+      <Text color="gray" dimColor>{t.quit}</Text>
     </Box>
   );
 }
