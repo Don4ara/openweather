@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, {useState} from 'react';
 import {Box, Text, useInput} from 'ink';
 import type {Lang} from '../i18n/index.ts';
 
@@ -17,12 +17,6 @@ type PromptInputProps = {
 export function PromptInput({onSubmit, onCommand, commands, lang}: PromptInputProps) {
   const [value, setValue] = useState('');
   const [selectedIndex, setSelectedIndex] = useState(0);
-  const [cursorOn, setCursorOn] = useState(true);
-
-  useEffect(() => {
-    const timer = setInterval(() => setCursorOn(c => !c), 530);
-    return () => clearInterval(timer);
-  }, []);
 
   const isCommandMode = value.startsWith('/');
   const filtered = isCommandMode
@@ -74,18 +68,6 @@ export function PromptInput({onSubmit, onCommand, commands, lang}: PromptInputPr
 
   return (
     <Box flexDirection="column">
-      <Box flexDirection="column" paddingLeft={2} height={isCommandMode ? filtered.length : 0}>
-        {isCommandMode && filtered.map((cmd, i) => {
-          const selected = i === clampedIndex;
-          return (
-            <Box key={cmd.name}>
-              <Text color={selected ? 'cyan' : 'gray'}>{selected ? '❯ ' : '  '}</Text>
-              <Text color={selected ? 'cyan' : 'gray'} bold={selected}>/{cmd.name}</Text>
-              <Text color="gray" dimColor>{'   '}{cmd.description}</Text>
-            </Box>
-          );
-        })}
-      </Box>
       <Box
         borderStyle="round"
         borderColor={isCommandMode ? 'cyan' : 'gray'}
@@ -93,9 +75,23 @@ export function PromptInput({onSubmit, onCommand, commands, lang}: PromptInputPr
       >
         <Text color="cyan" bold>❯ </Text>
         {value
-          ? <Text>{value}<Text color="cyan">{cursorOn ? '█' : ' '}</Text></Text>
-          : <Text><Text color="cyan">{cursorOn ? '█' : ' '}</Text><Text color="gray" dimColor> {placeholder}</Text></Text>}
+          ? <Text>{value}<Text color="cyan">█</Text></Text>
+          : <Text><Text color="cyan">█</Text><Text color="gray" dimColor> {placeholder}</Text></Text>}
       </Box>
+      {isCommandMode && filtered.length > 0 && (
+        <Box flexDirection="column" paddingLeft={2}>
+          {filtered.map((cmd, i) => {
+            const selected = i === clampedIndex;
+            return (
+              <Box key={cmd.name}>
+                <Text color={selected ? 'cyan' : 'gray'}>{selected ? '❯ ' : '  '}</Text>
+                <Text color={selected ? 'cyan' : 'gray'} bold={selected}>/{cmd.name}</Text>
+                <Text color="gray" dimColor>{'   '}{cmd.description}</Text>
+              </Box>
+            );
+          })}
+        </Box>
+      )}
     </Box>
   );
 }
