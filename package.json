@@ -2,16 +2,31 @@
   "name": "openweather",
   "version": "0.1.0",
   "type": "module",
+  "description": "Beautiful Claude Code-style weather TUI for the terminal",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Don4ara/openweather.git"
+  },
   "bin": {
-    "openweather": "./bin/openweather"
+    "openweather": "dist/openweather.js"
+  },
+  "files": [
+    "dist"
+  ],
+  "engines": {
+    "node": ">=18"
   },
   "scripts": {
     "dev": "bun run src/main.tsx",
-    "build": "bun build ./src/main.tsx --target=node --outdir=dist",
+    "build": "bun build ./src/main.tsx --target=node --outfile dist/openweather.js --define process.env.DEV=false",
     "compile": "bun build ./src/main.tsx --outfile openweather --compile",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "prepublishOnly": "bun run build"
   },
-  "dependencies": {
+  "devDependencies": {
+    "@types/bun": "latest",
+    "@types/node": "latest",
+    "@types/react": "latest",
     "chalk": "latest",
     "cli-boxes": "latest",
     "cli-highlight": "latest",
@@ -19,12 +34,8 @@
     "ink": "latest",
     "marked": "latest",
     "react": "latest",
+    "react-devtools-core": "^7.0.1",
+    "typescript": "latest",
     "wrap-ansi": "latest"
-  },
-  "devDependencies": {
-    "@types/bun": "latest",
-    "@types/node": "latest",
-    "@types/react": "latest",
-    "typescript": "latest"
   }
 }
