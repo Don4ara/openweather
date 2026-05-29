@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, {useEffect, useMemo, useState} from 'react';
 import {Box, Text, useApp, useInput} from 'ink';
 import {AppHeader} from '../components/AppHeader.tsx';
 import {Message} from '../components/Message.tsx';
@@ -20,6 +20,15 @@ export type ChatMessage =
   | {role: 'user' | 'tool' | 'error'; text: string}
   | {role: 'forecast'; weather: WeatherResult};
 
+// Cap chat history so a long session doesn't grow memory unbounded
+// (each forecast holds 8 days of data).
+const MAX_HISTORY = 50;
+
+function pushMessage(prev: ChatMessage[], msg: ChatMessage): ChatMessage[] {
+  const next = [...prev, msg];
+  return next.length > MAX_HISTORY ? next.slice(next.length - MAX_HISTORY) : next;
+}
+
 export function App({city, debug, config}: AppProps) {
   const {exit} = useApp();
 
@@ -33,15 +42,18 @@ export function App({city, debug, config}: AppProps) {
 
   const t = translations[lang];
 
-  const commands: Command[] = [
-    {name: 'lang', description: t.commands.lang},
-    {name: 'units', description: t.commands.units},
-    {name: 'save', description: t.commands.save},
-    {name: 'list', description: t.commands.list},
-    {name: 'clear', description: t.commands.clear},
-    {name: 'help', description: t.commands.help},
-    {name: 'quit', description: t.commands.quit},
-  ];
+  const commands: Command[] = useMemo(
+    () => [
+      {name: 'lang', description: t.commands.lang},
+      {name: 'units', description: t.commands.units},
+      {name: 'save', description: t.commands.save},
+      {name: 'list', description: t.commands.list},
+      {name: 'clear', description: t.commands.clear},
+      {name: 'help', description: t.commands.help},
+      {name: 'quit', description: t.commands.quit},
+    ],
+    [t],
+  );
 
   // Persist preferences whenever they change.
   useEffect(() => {
@@ -74,11 +86,11 @@ export function App({city, debug, config}: AppProps) {
       try {
         const result = await getWeather(query, lang, units);
         if (!alive) return;
-        setMessages(prev => [...prev, {role: 'forecast', weather: result}]);
+        setMessages(prev => pushMessage(prev, {role: 'forecast', weather: result}));
       } catch (err) {
         if (!alive) return;
         const msg = err instanceof Error ? err.message : String(err);
-        setMessages(prev => [...prev, {role: 'error', text: msg}]);
+        setMessages(prev => pushMessage(prev, {role: 'error', text: msg}));
       } finally {
         if (alive) setLoading(false);
       }
@@ -92,13 +104,13 @@ export function App({city, debug, config}: AppProps) {
   }, [query, lang, units]);
 
   function info(text: string) {
-    setMessages(prev => [...prev, {role: 'tool', text}]);
+    setMessages(prev => pushMessage(prev, {role: 'tool', text}));
   }
 
   function submitPrompt(value: string) {
     const nextCity = value.trim();
     if (!nextCity) return;
-    setMessages(prev => [...prev, {role: 'user', text: value}]);
+    setMessages(prev => pushMessage(prev, {role: 'user', text: value}));
     setQuery(nextCity);
   }
 
@@ -141,10 +153,14 @@ export function App({city, debug, config}: AppProps) {
     }
   }
 
-  // Accent color = latest successful forecast condition.
-  const latest = [...messages].reverse().find(m => m.role === 'forecast') as
-    | Extract<ChatMessage, {role: 'forecast'}>
-    | undefined;
+  // Accent color = latest successful forecast condition (reverse scan, no array copy).
+  let latest: Extract<ChatMessage, {role: 'forecast'}> | undefined;
+  for (let i = messages.length - 1; i >= 0; i--) {
+    if (messages[i].role === 'forecast') {
+      latest = messages[i] as Extract<ChatMessage, {role: 'forecast'}>;
+      break;
+    }
+  }
   const accent = latest ? iconColor(latest.weather.iconType) : 'cyan';
   const unitsLabel = `${unitConfig[units].tempLabel} · ${unitConfig[units].windLabel}`;
 
