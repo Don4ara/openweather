@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {Box, Text, useInput} from 'ink';
 import type {Lang} from '../i18n/index.ts';
 
@@ -17,6 +17,12 @@ type PromptInputProps = {
 export function PromptInput({onSubmit, onCommand, commands, lang}: PromptInputProps) {
   const [value, setValue] = useState('');
   const [selectedIndex, setSelectedIndex] = useState(0);
+  const [cursorOn, setCursorOn] = useState(true);
+
+  useEffect(() => {
+    const timer = setInterval(() => setCursorOn(c => !c), 530);
+    return () => clearInterval(timer);
+  }, []);
 
   const isCommandMode = value.startsWith('/');
   const filtered = isCommandMode
@@ -68,7 +74,7 @@ export function PromptInput({onSubmit, onCommand, commands, lang}: PromptInputPr
 
   return (
     <Box flexDirection="column">
-      <Box flexDirection="column" paddingLeft={3} height={commands.length}>
+      <Box flexDirection="column" paddingLeft={2} height={isCommandMode ? filtered.length : 0}>
         {isCommandMode && filtered.map((cmd, i) => {
           const selected = i === clampedIndex;
           return (
@@ -81,16 +87,14 @@ export function PromptInput({onSubmit, onCommand, commands, lang}: PromptInputPr
         })}
       </Box>
       <Box
-        borderStyle="single"
-        borderColor="gray"
-        borderTop={true}
-        borderBottom={true}
-        borderLeft={false}
-        borderRight={false}
-        paddingX={2}
+        borderStyle="round"
+        borderColor={isCommandMode ? 'cyan' : 'gray'}
+        paddingX={1}
       >
-        <Text color="cyan">&gt; </Text>
-        <Text>{value || placeholder}</Text>
+        <Text color="cyan" bold>❯ </Text>
+        {value
+          ? <Text>{value}<Text color="cyan">{cursorOn ? '█' : ' '}</Text></Text>
+          : <Text><Text color="cyan">{cursorOn ? '█' : ' '}</Text><Text color="gray" dimColor> {placeholder}</Text></Text>}
       </Box>
     </Box>
   );
