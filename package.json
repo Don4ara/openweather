@@ -1,5 +1,5 @@
 {
-  "name": "openweather",
+  "name": "openweather-tui",
   "version": "0.1.0",
   "type": "module",
   "description": "Beautiful Claude Code-style weather TUI for the terminal",
