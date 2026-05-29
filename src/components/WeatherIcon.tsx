@@ -7,26 +7,29 @@ type WeatherIconProps = {
   night?: boolean;
 };
 
+// All icons are pure ASCII (. - / \ | ( ) _ * ' " ~) so they render
+// identically in any terminal font — no exotic unicode glyphs.
 export function WeatherIcon({type, night = false}: WeatherIconProps) {
   if (type === 'sun') {
+    // Clear sky: sun by day, crescent moon by night.
     if (night) {
       return (
         <Box flexDirection="column">
-          <Text color="gray">    .--.    </Text>
-          <Text color="yellowBright">   /    \   </Text>
-          <Text color="yellowBright">  |      )  </Text>
-          <Text color="yellowBright">   \    /   </Text>
-          <Text color="gray">    `--'    </Text>
+          <Text color="gray">    .--.     </Text>
+          <Text color="whiteBright">   /    )    </Text>
+          <Text color="whiteBright">  (    (     </Text>
+          <Text color="whiteBright">   \    )    </Text>
+          <Text color="gray">    `--'     </Text>
         </Box>
       );
     }
     return (
       <Box flexDirection="column">
-        <Text color="yellowBright">  \   |   /  </Text>
-        <Text color="yellowBright">    .---.    </Text>
-        <Text color="yellowBright">— (  ☼  ) —  </Text>
-        <Text color="yellowBright">    `---'    </Text>
-        <Text color="yellowBright">  /   |   \  </Text>
+        <Text color="yellowBright">    \   /    </Text>
+        <Text color="yellowBright">     .-.     </Text>
+        <Text color="yellowBright">  - (   ) -  </Text>
+        <Text color="yellowBright">     `-'     </Text>
+        <Text color="yellowBright">    /   \    </Text>
       </Box>
     );
   }
@@ -44,18 +47,18 @@ export function WeatherIcon({type, night = false}: WeatherIconProps) {
   }
 
   if (type === 'partly-cloudy') {
+    // Sun (or moon) peeking out behind a cloud.
     return (
       <Box flexDirection="column">
-        <Text color={night ? 'gray' : 'yellowBright'}>{night ? '  .--. ' : '  \\  /  '}</Text>
+        <Text color={night ? 'gray' : 'yellowBright'}>{night ? '   .--.      ' : '   \\  /      '}</Text>
         <Text>
-          <Text color={night ? 'yellow' : 'yellowBright'}>{night ? ' (   ) ' : ' _ /""'}</Text>
-          <Text color="white">{night ? '.--.' : '.-.  '}</Text>
+          <Text color={night ? 'whiteBright' : 'yellowBright'}>{night ? '  (    )  .--.' : ' _ /"" .--.   '}</Text>
         </Text>
         <Text>
-          <Text color={night ? 'gray' : 'yellowBright'}>{night ? "  `-'" : '   \\_'}</Text>
-          <Text color="white">(    ).</Text>
+          <Text color={night ? 'gray' : 'yellowBright'}>{night ? "   `--' " : '   \\_  '}</Text>
+          <Text color="white">{night ? '(    ).' : '(    ). '}</Text>
         </Text>
-        <Text color="gray">   (___.__)__)</Text>
+        <Text color="gray">  (___.__)__) </Text>
         <Text color="gray">             </Text>
       </Box>
     );
@@ -67,8 +70,8 @@ export function WeatherIcon({type, night = false}: WeatherIconProps) {
         <Text color="whiteBright">     .--.    </Text>
         <Text color="white">  .-(    ).  </Text>
         <Text color="gray"> (___.__)__) </Text>
-        <Text color="blueBright">  ‚ʻ‚ʻ‚ʻ‚ʻ  </Text>
-        <Text color="blue"> ‚ʻ‚ʻ‚ʻ‚ʻ   </Text>
+        <Text color="blueBright">  ' ' ' '    </Text>
+        <Text color="blue"> ' ' ' '     </Text>
       </Box>
     );
   }
@@ -79,8 +82,8 @@ export function WeatherIcon({type, night = false}: WeatherIconProps) {
         <Text color="whiteBright">     .--.    </Text>
         <Text color="white">  .-(    ).  </Text>
         <Text color="gray"> (___.__)__) </Text>
-        <Text color="yellowBright">   ⚡‚ʻ⚡‚ʻ   </Text>
-        <Text color="blue">  ‚ʻ‚ʻ‚ʻ‚   </Text>
+        <Text color="yellowBright">   /_ /_     </Text>
+        <Text color="blue">  '   '      </Text>
       </Box>
     );
   }
@@ -91,8 +94,8 @@ export function WeatherIcon({type, night = false}: WeatherIconProps) {
         <Text color="whiteBright">     .--.    </Text>
         <Text color="white">  .-(    ).  </Text>
         <Text color="gray"> (___.__)__) </Text>
-        <Text color="cyanBright">   ❄  ❄  ❄  </Text>
-        <Text color="cyan"> ❄  ❄  ❄    </Text>
+        <Text color="cyanBright">   *  *  *   </Text>
+        <Text color="cyan"> *  *  *     </Text>
       </Box>
     );
   }
@@ -101,9 +104,9 @@ export function WeatherIcon({type, night = false}: WeatherIconProps) {
   return (
     <Box flexDirection="column">
       <Text color="gray">             </Text>
-      <Text color="gray"> ≡ ≡ ≡ ≡ ≡   </Text>
-      <Text color="whiteBright">  ≡ ≡ ≡ ≡ ≡  </Text>
-      <Text color="gray"> ≡ ≡ ≡ ≡ ≡   </Text>
+      <Text color="gray"> ~ ~ ~ ~ ~   </Text>
+      <Text color="whiteBright">  ~ ~ ~ ~ ~  </Text>
+      <Text color="gray"> ~ ~ ~ ~ ~   </Text>
       <Text color="gray">             </Text>
     </Box>
   );
