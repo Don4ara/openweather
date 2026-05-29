@@ -53,7 +53,7 @@
 ### Глобально через npm
 
 ```bash
-npm install -g openweather
+npm install -g openweather-tui
 openweather Stockholm
 ```
 
