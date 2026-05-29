@@ -48,9 +48,19 @@
 
 </div>
 
-## 🚀 Быстрый старт
+## 🚀 Установка
 
-Нужен [Bun](https://bun.sh).
+### Глобально через npm
+
+```bash
+npm install -g openweather
+openweather Stockholm
+```
+
+После установки команда `openweather` доступна из любого места. Настройки
+(избранное, язык, единицы) сохраняются в `~/.openweather/config.json`.
+
+### Из исходников (Bun)
 
 ```bash
 bun install
@@ -62,6 +72,8 @@ bun run dev Stockholm
 ```bash
 bun run dev                 # город по умолчанию или первый избранный
 bun run dev Москва --debug  # debug-режим
+bun run build               # собрать standalone-бандл в dist/
+npm install -g .            # установить локальную сборку глобально
 ```
 
 ## ✨ Возможности
