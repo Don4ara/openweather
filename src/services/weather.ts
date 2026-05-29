@@ -28,6 +28,7 @@ export type DayForecast = {
   date: string;
   label: string;
   condition: string;
+  conditionShort: string;
   icon: string;
   tempMax: number;
   tempMin: number;
@@ -35,6 +36,13 @@ export type DayForecast = {
   windMax: number;
   sunrise: string;
   sunset: string;
+};
+
+export type HourForecast = {
+  hourLabel: string;
+  temp: number;
+  precipitationProbability: number;
+  iconType: WeatherIconType;
 };
 
 export type WeatherResult = {
@@ -53,18 +61,21 @@ export type WeatherResult = {
   tempLabel: string;
   windLabel: string;
   forecast: DayForecast[];
+  hourly: HourForecast[];
 };
 
-export function wmoToCondition(code: number, lang: Lang = 'ru'): {condition: string; icon: string; iconType: WeatherIconType} {
-  const c = translations[lang].conditions;
-  if (code === 0) return {condition: c.clear, icon: '☀', iconType: 'sun'};
-  if (code <= 3) return {condition: c.partlyCloudy, icon: '⛅', iconType: 'partly-cloudy'};
-  if (code <= 48) return {condition: c.fog, icon: '≡', iconType: 'mist'};
-  if (code <= 67) return {condition: c.rain, icon: '~', iconType: 'rain'};
-  if (code <= 77) return {condition: c.snow, icon: '*', iconType: 'snow'};
-  if (code <= 82) return {condition: c.showers, icon: '~', iconType: 'rain'};
-  if (code <= 86) return {condition: c.snowfall, icon: '*', iconType: 'snow'};
-  return {condition: c.storm, icon: '!', iconType: 'storm'};
+export function wmoToCondition(code: number, lang: Lang = 'ru'): {condition: string; conditionShort: string; icon: string; iconType: WeatherIconType} {
+  const t = translations[lang];
+  const c = t.conditions;
+  const s = t.conditionsShort;
+  if (code === 0) return {condition: c.clear, conditionShort: s.clear, icon: '☀', iconType: 'sun'};
+  if (code <= 3) return {condition: c.partlyCloudy, conditionShort: s.partlyCloudy, icon: '⛅', iconType: 'partly-cloudy'};
+  if (code <= 48) return {condition: c.fog, conditionShort: s.fog, icon: '≡', iconType: 'mist'};
+  if (code <= 67) return {condition: c.rain, conditionShort: s.rain, icon: '~', iconType: 'rain'};
+  if (code <= 77) return {condition: c.snow, conditionShort: s.snow, icon: '*', iconType: 'snow'};
+  if (code <= 82) return {condition: c.showers, conditionShort: s.showers, icon: '~', iconType: 'rain'};
+  if (code <= 86) return {condition: c.snowfall, conditionShort: s.snowfall, icon: '*', iconType: 'snow'};
+  return {condition: c.storm, conditionShort: s.storm, icon: '!', iconType: 'storm'};
 }
 
 function dayLabel(dateStr: string, index: number, lang: Lang): string {
@@ -111,6 +122,7 @@ export async function getWeather(city: string, lang: Lang = 'ru', system: UnitSy
   const weatherRes = await fetch(
     `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}` +
     `&current=temperature_2m,apparent_temperature,relative_humidity_2m,surface_pressure,wind_speed_10m,weather_code,is_day` +
+    `&hourly=temperature_2m,precipitation_probability,weather_code` +
     `&daily=temperature_2m_max,temperature_2m_min,weather_code,precipitation_probability_max,wind_speed_10m_max,sunrise,sunset` +
     `&temperature_unit=${temperatureUnit}&wind_speed_unit=${windSpeedUnit}&forecast_days=8&timezone=auto`
   );
@@ -118,6 +130,7 @@ export async function getWeather(city: string, lang: Lang = 'ru', system: UnitSy
 
   const data = await weatherRes.json() as {
     current: {
+      time: string;
       temperature_2m: number;
       apparent_temperature: number;
       relative_humidity_2m: number;
@@ -125,6 +138,12 @@ export async function getWeather(city: string, lang: Lang = 'ru', system: UnitSy
       wind_speed_10m: number;
       weather_code: number;
       is_day: number;
+    };
+    hourly: {
+      time: string[];
+      temperature_2m: number[];
+      precipitation_probability: number[];
+      weather_code: number[];
     };
     daily: {
       time: string[];
@@ -141,12 +160,28 @@ export async function getWeather(city: string, lang: Lang = 'ru', system: UnitSy
   const {temperature_2m, apparent_temperature, relative_humidity_2m, surface_pressure, wind_speed_10m, weather_code, is_day} = data.current;
   const {condition, icon, iconType} = wmoToCondition(weather_code, lang);
 
+  // Hourly: start at the first slot >= current time, take next 24 hours.
+  let start = data.hourly.time.findIndex(t => t >= data.current.time);
+  if (start < 0) start = 0;
+  const hourly: HourForecast[] = data.hourly.time
+    .slice(start, start + 24)
+    .map((t, k) => {
+      const i = start + k;
+      return {
+        hourLabel: t.slice(11, 13),
+        temp: Math.round(data.hourly.temperature_2m[i]),
+        precipitationProbability: Math.round(data.hourly.precipitation_probability[i] ?? 0),
+        iconType: wmoToCondition(data.hourly.weather_code[i], lang).iconType,
+      };
+    });
+
   const forecast: DayForecast[] = data.daily.time.map((date, i) => {
-    const {condition: fc, icon: fi} = wmoToCondition(data.daily.weather_code[i], lang);
+    const {condition: fc, conditionShort: fcs, icon: fi} = wmoToCondition(data.daily.weather_code[i], lang);
     return {
       date,
       label: dayLabel(date, i, lang),
       condition: fc,
+      conditionShort: fcs,
       icon: fi,
       tempMax: Math.round(data.daily.temperature_2m_max[i]),
       tempMin: Math.round(data.daily.temperature_2m_min[i]),
@@ -173,5 +208,6 @@ export async function getWeather(city: string, lang: Lang = 'ru', system: UnitSy
     tempLabel,
     windLabel,
     forecast,
+    hourly,
   };
 }
